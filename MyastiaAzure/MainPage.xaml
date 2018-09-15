@@ -8,7 +8,9 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Width="500" Height="300">
-        <TextBox x:Name="TextBox01" HorizontalAlignment="Left" Margin="150,100,0,0" Text="TextBox" VerticalAlignment="Top" Height="40" Width="150" FontSize="24"/>
+        <TextBox x:Name="TextBox01" HorizontalAlignment="Left" Margin="150,100,0,0" Text="TextBox" VerticalAlignment="Top" Height="40" Width="200" FontSize="24"/>
+        <TextBox x:Name="TextBoxHubMessage" HorizontalAlignment="Left" Margin="150,145,0,0" Text="TextBox" VerticalAlignment="Top" Width="200" Height="40" FontSize="20"/>
+        <TextBox x:Name="TextBoxError" HorizontalAlignment="Left" Text="TextBox" VerticalAlignment="Top" Margin="150,190,0,0" FontSize="20" Width="200" Height="40"/>
 
     </Grid>
 </Page>

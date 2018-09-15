@@ -19,6 +19,9 @@ namespace MyastiaAzure
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        DispatcherTimer timer;
+        SensorDevice myDevice;
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -29,32 +32,29 @@ namespace MyastiaAzure
 
         private async void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-            var myDevice = new SensorDevice();
-            await myDevice.Run();
+            myDevice = new SensorDevice();
+            myDevice.Run();
 
             this.TextBox01.Text = "完了";
+
+            timer = new DispatcherTimer();
+            timer.Tick += SetTextBoxIotHub;
+            timer.Interval = new TimeSpan(0, 0, 1);
+            timer.Start();
+        }
+
+        private void SetTextBoxIotHub(object sender, object e)
+        {
+            this.TextBoxHubMessage.Text = myDevice.ReceivedMessage;
+            if (myDevice.Error.Count != 0)
+            {
+                this.TextBoxError.Text = myDevice.Error[0];
+            }
         }
 
         private void MainPage_Unloaded(object sender, RoutedEventArgs e)
         {
-
+            
         }
-
-
-        //private async Task ReceiveDataFromAzure()
-        //{
-        //    Message receivedMessage;
-        //    string messageData = string.Empty;
-        //    while (true)
-        //    {
-        //        receivedMessage = await deviceClient.ReceiveAsync();
-        //        if (receivedMessage != null)
-        //        {
-        //            messageData = Encoding.UTF8.GetString(receivedMessage.GetBytes());
-        //            Debug.WriteLine(messageData);
-        //            await deviceClient.CompleteAsync(receivedMessage);
-        //        }
-        //    }
-        //}
     }
 }

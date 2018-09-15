@@ -25,7 +25,7 @@ namespace MyastiaAzure
             deviceProperty = new KeyValuePair<string, string>("DeviceType", "RasspberryPi");
 
 
-            deviceClient = DeviceClient.CreateFromConnectionString(cnString.ToString(),TransportType.Http1);
+            deviceClient = DeviceClient.CreateFromConnectionString(cnString.ToString(), TransportType.Http1);
         }
         ~SensorDevice()
         {
@@ -35,47 +35,67 @@ namespace MyastiaAzure
         //プロパティ
         //********************************************************************************
         public string ReceivedMessage { get; set; } = string.Empty;
+        public List<string> Error { get; } = new List<string>();
 
         //********************************************************************************
         //メソッド
         //********************************************************************************
-        public async Task Run()
+        public async void Run()
         {
-            await SendAzureMessage();
-
+            SendAzureMessage();
+            ReceiveAzureMessage();
         }
 
-        public async Task SendAzureMessage()
+        private async Task ThrowError()
         {
-            var data = new SensorData();
-            data.DeviceId = DeviceId;
-            data.SensorText = "Use json";
-
-            var dataString = JsonConvert.SerializeObject(data);
-            using (var message = new Message(Encoding.UTF8.GetBytes(dataString)))
-            {
-                message.Properties.Add(deviceProperty);
-                await deviceClient.SendEventAsync(message);
-            }
+            await Task.Delay(1000);
+            throw new Exception();
         }
 
-        public async Task ReceiveAzureMessage()
+        private async Task SendAzureMessage()
         {
-            while (true)
+            try
             {
-                var message = await deviceClient.ReceiveAsync();
-                if (message == null)
+                var data = new SensorData();
+                data.DeviceId = DeviceId;
+                data.SensorText = "Use json";
+
+                var dataString = JsonConvert.SerializeObject(data);
+                using (var message = new Message(Encoding.UTF8.GetBytes(dataString)))
                 {
-                    continue;
+                    message.Properties.Add(deviceProperty);
+                    await deviceClient.SendEventAsync(message);
                 }
-                var messageText = Encoding.UTF8.GetString(message.GetBytes());
-                await deviceClient.CompleteAsync(message);
-                message.Dispose();
-
-                this.ReceivedMessage = messageText;
+            }
+            catch (Exception e)
+            {
+                this.Error.Add(JsonConvert.SerializeObject(e));
             }
         }
 
+        private async Task ReceiveAzureMessage()
+        {
+            try
+            {
+                while (true)
+                {
+                    using (var message = await deviceClient.ReceiveAsync())
+                    {
+                        if (message == null)
+                        {
+                            continue;
+                        }
+                        var messageText = Encoding.UTF8.GetString(message.GetBytes());
+                        await deviceClient.CompleteAsync(message);
+                        this.ReceivedMessage = messageText;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                this.Error.Add(JsonConvert.SerializeObject(e));
+            }
+        }
     }
 
     class SensorData
