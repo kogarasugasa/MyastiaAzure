@@ -66,6 +66,7 @@ namespace MyastiaAzure
                     message.Properties.Add(deviceProperty);
                     await deviceClient.SendEventAsync(message);
                 }
+                await Task.Delay(1000);
             }
             catch (Exception e)
             {
@@ -83,6 +84,7 @@ namespace MyastiaAzure
                     {
                         if (message == null)
                         {
+                            await Task.Delay(5000);
                             continue;
                         }
                         var messageText = Encoding.UTF8.GetString(message.GetBytes());
